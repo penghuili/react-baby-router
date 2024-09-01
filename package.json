@@ -1,0 +1,26 @@
+{
+  "name": "react-baby-router",
+  "version": "0.0.1",
+  "description": "Such a simple react router.",
+  "author": "Penghui Li",
+  "main": "index.jsx",
+  "scripts": {
+    "publish": "npm publish --auth-type=legacy"
+  },
+  "peerDependencies": {
+    "react": ">= 16.8"
+  },
+  "keywords": [
+    "react",
+    "reactjs",
+    "router",
+    "react router",
+    "baby",
+    "simple"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/penghuili/usecat.git"
+  },
+  "license": "MIT"
+}
