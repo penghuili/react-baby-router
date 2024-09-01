@@ -2,7 +2,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 let renderPage = () => {};
 
-window.addEventListener("popstate", renderPage);
+const handlePopState = () => {
+  renderPage();
+};
+window.addEventListener("popstate", handlePopState);
 
 // Navigate with function
 export const navigateTo = (to) => {
