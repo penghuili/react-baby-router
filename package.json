@@ -1,6 +1,6 @@
 {
   "name": "react-baby-router",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Such a simple react router.",
   "author": "Penghui Li",
   "main": "index.jsx",
