@@ -72,13 +72,13 @@ goBack();
 ### Navigate with a component:
 
 ```
-import { Link } from '@radix-ui/themes';
+import { Button } from '@radix-ui/themes';
 import { BabyLink } from 'react-baby-router';
 import React from 'react';
 
 // Use your own link component
 const RouteLink = React.memo(({ to, children }) => {
-  return <BabyLink to={to}><Link>{children}</Link></BabyLink>;
+  return <BabyLink to={to}><Button variant="soft" size="1">{children}</Button></BabyLink>;
 });
 
 function MyComponent() {
