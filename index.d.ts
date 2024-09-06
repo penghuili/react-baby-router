@@ -23,6 +23,7 @@ export interface BabyRoutesProps {
     [route: string]: React.ComponentType<RouteComponentProps>;
   };
   defaultRoute?: string;
+  enableAnimation?: boolean;
 }
 
 export const BabyRoutes: React.MemoExoticComponent<React.FC<BabyRoutesProps>>;

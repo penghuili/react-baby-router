@@ -52,6 +52,12 @@ export const Router = React.memo(() => {
 });
 ```
 
+Use `enableAnimation` to control page transition animation (enabled by default).
+
+```
+<Routes routes={loggedInRoutes} enableAnimation={false} />
+```
+
 ### Navigate anywhere within your app:
 
 ```
