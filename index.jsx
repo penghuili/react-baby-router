@@ -61,12 +61,24 @@ export const BabyLink = React.memo(({ to, children }) => {
  */
 export const BabyRoutes = React.memo(
   ({ routes, defaultRoute = "/", enableAnimation = true }) => {
-    const [page, setPage] = useState(null);
+    const [page, setPage] = useState(getPageComponent(routes));
     const [location, setLocation] = useState(window.location.pathname);
     const [direction, setDirection] = useState("forward");
     const [isBrowserNavigate, setIsBrowserNavigate] = useState(false);
 
     useEffect(() => {
+      renderPage = (newDirection) => {
+        const newPage = getPageComponent(routes);
+        setPage(newPage);
+        setLocation(window.location.pathname);
+        setDirection(newDirection);
+
+        setTimeout(() => {
+          const scrollPosition = scrollPositions[window.location.pathname] || 0;
+          window.scrollTo(0, scrollPosition);
+        }, 300);
+      };
+
       const handlePopState = (event) => {
         if (!isProgramGoBack) {
           setIsBrowserNavigate(true);
@@ -87,18 +99,6 @@ export const BabyRoutes = React.memo(
         renderPage(newDirection);
       };
 
-      renderPage = (newDirection) => {
-        const newPage = getPageComponent(routes);
-        setPage(newPage);
-        setLocation(window.location.pathname);
-        setDirection(newDirection);
-
-        setTimeout(() => {
-          const scrollPosition = scrollPositions[window.location.pathname] || 0;
-          window.scrollTo(0, scrollPosition);
-        }, 300);
-      };
-
       checkIsBrowserNavigate = setIsBrowserNavigate;
 
       window.addEventListener("popstate", handlePopState);
@@ -109,7 +109,7 @@ export const BabyRoutes = React.memo(
       window.history.replaceState(
         { position: 0 },
         "",
-        window.location.pathname
+        `${window.location.pathname}${window.location.search}`
       );
 
       renderPage("forward");
