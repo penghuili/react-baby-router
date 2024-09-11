@@ -1,39 +1,36 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import React, { useCallback, useEffect, useState } from 'react';
+import "./style.css";
+
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 let renderPage = () => {};
+let currentPosition = history.state?.position || 1;
 let checkIsBrowserNavigate = () => {};
-let historyStack = [];
-let currentPosition = 0;
-let scrollPositions = {};
 let isProgramGoBack = false;
+const ANIMATION_DURATION = 200;
 
 export const navigateTo = (to) => {
   if (isUrlChanged(to)) {
-    scrollPositions[window.location.pathname] = window.scrollY;
-    historyStack = historyStack.slice(0, currentPosition + 1);
-    historyStack.push(window.location.pathname);
     currentPosition++;
     window.history.pushState({ position: currentPosition }, "", to);
-    renderPage("forward");
     checkIsBrowserNavigate(false);
     isProgramGoBack = false;
+    renderPage("forward", to);
   }
 };
 
 export const replaceTo = (to) => {
   if (isUrlChanged(to)) {
     window.history.replaceState({ position: currentPosition }, "", to);
-    renderPage("forward");
     checkIsBrowserNavigate(false);
     isProgramGoBack = false;
+    renderPage("forward", to);
   }
 };
 
 export const goBack = () => {
-  window.history.back();
   checkIsBrowserNavigate(false);
   isProgramGoBack = true;
+  window.history.back();
 };
 
 // Navigate with component
@@ -61,58 +58,63 @@ export const BabyLink = React.memo(({ to, children }) => {
  */
 export const BabyRoutes = React.memo(
   ({ routes, defaultRoute = "/", enableAnimation = true }) => {
-    const [page, setPage] = useState(getPageComponent(routes));
-    const [location, setLocation] = useState(window.location.pathname);
-    const [direction, setDirection] = useState("forward");
+    const [pageStack, setPageStack] = useState(
+      routes[window.location.pathname]
+        ? [
+            {
+              key: `${window.location.pathname}${window.location.search}`,
+              component: getPageComponent(
+                routes,
+                `${window.location.pathname}${window.location.search}`
+              ),
+            },
+          ]
+        : []
+    );
     const [isBrowserNavigate, setIsBrowserNavigate] = useState(false);
+    const [animationState, setAnimationState] = useState("none"); // 'none', 'enter', 'active'
+    const timeoutRef = useRef(null);
+
+    renderPage = (newDirection, newPath) => {
+      if (newDirection === "forward") {
+        setAnimationState("enter");
+        setPageStack([
+          ...pageStack,
+          { key: newPath, component: getPageComponent(routes, newPath) },
+        ]);
+
+        // Use requestAnimationFrame to ensure the 'enter' class is applied before 'active'
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setAnimationState("active");
+          });
+        });
+      } else {
+        setPageStack(pageStack.slice(0, pageStack.length - 1));
+      }
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
 
     useEffect(() => {
-      renderPage = (newDirection) => {
-        const newPage = getPageComponent(routes);
-        setPage(newPage);
-        setLocation(window.location.pathname);
-        setDirection(newDirection);
-
-        setTimeout(() => {
-          const scrollPosition = scrollPositions[window.location.pathname] || 0;
-          window.scrollTo(0, scrollPosition);
-        }, 300);
-      };
-
       const handlePopState = (event) => {
         if (!isProgramGoBack) {
           setIsBrowserNavigate(true);
-          isProgramGoBack = false;
         }
+
         const newPosition = event.state?.position ?? 0;
-        let newDirection;
 
-        if (newPosition > currentPosition) {
-          newDirection = "forward";
-        } else if (newPosition < currentPosition) {
-          newDirection = "backward";
-        } else {
-          newDirection = "forward"; // Default to forward if we can't determine
-        }
-
-        currentPosition = newPosition;
-        renderPage(newDirection);
+        renderPage(
+          newPosition > currentPosition ? "forward" : "backward",
+          `${window.location.pathname}${window.location.search}`
+        );
       };
-
-      checkIsBrowserNavigate = setIsBrowserNavigate;
 
       window.addEventListener("popstate", handlePopState);
 
-      // Initialize the history stack with the current page
-      historyStack = [window.location.pathname];
-      currentPosition = 0;
-      window.history.replaceState(
-        { position: 0 },
-        "",
-        `${window.location.pathname}${window.location.search}`
-      );
-
-      renderPage("forward");
+      checkIsBrowserNavigate = setIsBrowserNavigate;
 
       return () => {
         window.removeEventListener("popstate", handlePopState);
@@ -120,49 +122,49 @@ export const BabyRoutes = React.memo(
     }, [routes]);
 
     useEffect(() => {
-      if (!page) {
-        navigateTo(defaultRoute);
+      if (!pageStack[0]) {
+        replaceTo(defaultRoute);
       }
-    }, [defaultRoute, page]);
+    }, [defaultRoute, pageStack, routes]);
 
-    if (!enableAnimation || (isBrowserNavigate && isIOSBrowser())) {
-      return page;
-    }
-
-    const pageVariants = {
-      initial: (direction) => ({
-        opacity: 0,
-        x: direction === "forward" ? "100%" : "-100%",
-      }),
-      in: {
-        opacity: 1,
-        x: 0,
-      },
-      out: (direction) => ({
-        opacity: 0,
-        x: direction === "forward" ? "-100%" : "100%",
-      }),
-    };
-    const pageTransition = {
-      type: "tween",
-      ease: [0.4, 0, 0.2, 1],
-      duration: 0.15,
-    };
+    const isAnimationEnabled =
+      enableAnimation && !(isBrowserNavigate && isIOSBrowser());
 
     return (
-      <AnimatePresence mode="wait" custom={direction}>
-        <motion.div
-          key={location}
-          custom={direction}
-          initial="initial"
-          animate="in"
-          exit="out"
-          variants={pageVariants}
-          transition={pageTransition}
-        >
-          {page}
-        </motion.div>
-      </AnimatePresence>
+      <div className="page-container">
+        {pageStack.map((page, index) => {
+          const isLast = index === pageStack.length - 1;
+          const isSecondLast = index === pageStack.length - 2;
+
+          let className = "page";
+          if (isAnimationEnabled) {
+            if (isLast && animationState !== "none") {
+              className +=
+                animationState === "enter"
+                  ? " page-enter"
+                  : " page-enter page-enter-active";
+            } else if (isSecondLast && animationState !== "none") {
+              className += " page-exit page-exit-active";
+            }
+          }
+
+          return (
+            <div
+              key={page.key}
+              className={className}
+              style={{
+                zIndex: index,
+                display: isLast || isSecondLast ? "block" : "none",
+                transition: isAnimationEnabled
+                  ? `transform ${ANIMATION_DURATION}ms ease`
+                  : "none",
+              }}
+            >
+              <div className="page-content">{page.component}</div>
+            </div>
+          );
+        })}
+      </div>
     );
   }
 );

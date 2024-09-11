@@ -9,8 +9,7 @@
     "publish": "npm publish --auth-type=legacy"
   },
   "peerDependencies": {
-    "react": ">= 16.8",
-    "framer-motion": ">=11.0.0 <12.0.0"
+    "react": ">= 16.8"
   },
   "keywords": [
     "react",
