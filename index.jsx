@@ -18,8 +18,8 @@ export const navigateTo = (to) => {
   }
 };
 
-export const replaceTo = (to) => {
-  if (isUrlChanged(to)) {
+export const replaceTo = (to, force) => {
+  if (isUrlChanged(to) || force) {
     window.history.replaceState({ position: currentPosition }, "", to);
     checkIsBrowserNavigate(false);
     isProgramGoBack = false;
@@ -123,7 +123,7 @@ export const BabyRoutes = React.memo(
 
     useEffect(() => {
       if (!pageStack[0]) {
-        replaceTo(defaultRoute);
+        replaceTo(defaultRoute, true);
       }
     }, [defaultRoute, pageStack, routes]);
 
