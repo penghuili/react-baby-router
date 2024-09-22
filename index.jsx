@@ -1,6 +1,6 @@
-import "./style.css";
+import './style.css';
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 let renderPage = () => {};
 let currentPosition = history.state?.position || 1;
@@ -18,8 +18,8 @@ export const navigateTo = (to) => {
   }
 };
 
-export const replaceTo = (to, force) => {
-  if (isUrlChanged(to) || force) {
+export const replaceTo = (to) => {
+  if (isUrlChanged(to)) {
     window.history.replaceState({ position: currentPosition }, "", to);
     checkIsBrowserNavigate(false);
     isProgramGoBack = false;
@@ -50,27 +50,9 @@ export const BabyLink = React.memo(({ to, children }) => {
   );
 });
 
-/**
- * Main component to organize the routes
- * @param {{[route: string]: React.Component}} routes
- * @param {string} defaultRoute
- * @param {boolean} enableAnimation - Enable page transition animation
- */
 export const BabyRoutes = React.memo(
   ({ routes, defaultRoute = "/", enableAnimation = true }) => {
-    const [pageStack, setPageStack] = useState(
-      routes[window.location.pathname]
-        ? [
-            {
-              key: `${window.location.pathname}${window.location.search}`,
-              component: getPageComponent(
-                routes,
-                `${window.location.pathname}${window.location.search}`
-              ),
-            },
-          ]
-        : []
-    );
+    const [pageStack, setPageStack] = useState(initPageStack(routes));
     const [isBrowserNavigate, setIsBrowserNavigate] = useState(false);
     const [animationState, setAnimationState] = useState("none"); // 'none', 'enter', 'active'
     const timeoutRef = useRef(null);
@@ -116,6 +98,8 @@ export const BabyRoutes = React.memo(
 
       checkIsBrowserNavigate = setIsBrowserNavigate;
 
+      setPageStack(initPageStack(routes));
+
       return () => {
         window.removeEventListener("popstate", handlePopState);
       };
@@ -123,7 +107,7 @@ export const BabyRoutes = React.memo(
 
     useEffect(() => {
       if (!pageStack[0]) {
-        replaceTo(defaultRoute, true);
+        replaceTo(defaultRoute);
       }
     }, [defaultRoute, pageStack, routes]);
 
@@ -168,6 +152,20 @@ export const BabyRoutes = React.memo(
     );
   }
 );
+
+function initPageStack(routes) {
+  return routes[window.location.pathname]
+    ? [
+        {
+          key: `${window.location.pathname}${window.location.search}`,
+          component: getPageComponent(
+            routes,
+            `${window.location.pathname}${window.location.search}`
+          ),
+        },
+      ]
+    : [];
+}
 
 function getPageComponent(routes) {
   const { pathname, search } = window.location;
