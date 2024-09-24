@@ -51,7 +51,13 @@ export const BabyLink = React.memo(({ to, children }) => {
 });
 
 export const BabyRoutes = React.memo(
-  ({ routes, defaultRoute = "/", enableAnimation = true }) => {
+  ({
+    routes,
+    defaultRoute = "/",
+    enableAnimation = true,
+    bgColor = "white",
+    maxWidth = "none",
+  }) => {
     const [pageStack, setPageStack] = useState(initPageStack(routes));
     const [isBrowserNavigate, setIsBrowserNavigate] = useState(false);
     const [animationState, setAnimationState] = useState("none"); // 'none', 'enter', 'active'
@@ -147,6 +153,9 @@ export const BabyRoutes = React.memo(
               key={page.key}
               className={className}
               style={{
+                ...(bgColor ? { "--baby-routes-background": bgColor } : {}),
+                ...(maxWidth ? { "--baby-routes-max-width": maxWidth } : {}),
+
                 zIndex: index,
                 display: isLast || isSecondLast ? "block" : "none",
                 transition: isAnimationEnabled
