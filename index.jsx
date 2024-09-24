@@ -1,6 +1,6 @@
-import './style.css';
+import "./style.css";
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 let renderPage = () => {};
 let currentPosition = history.state?.position || 1;
@@ -23,7 +23,7 @@ export const replaceTo = (to) => {
     window.history.replaceState({ position: currentPosition }, "", to);
     checkIsBrowserNavigate(false);
     isProgramGoBack = false;
-    renderPage("forward", to);
+    renderPage("replace", to);
   }
 };
 
@@ -71,6 +71,11 @@ export const BabyRoutes = React.memo(
             setAnimationState("active");
           });
         });
+      } else if (newDirection === "replace") {
+        setPageStack([
+          ...pageStack.slice(0, pageStack.length - 1),
+          { key: newPath, component: getPageComponent(routes, newPath) },
+        ]);
       } else {
         setPageStack(pageStack.slice(0, pageStack.length - 1));
       }
@@ -107,7 +112,12 @@ export const BabyRoutes = React.memo(
 
     useEffect(() => {
       if (!pageStack[0]) {
-        replaceTo(defaultRoute);
+        const newStack = initPageStack(routes);
+        if (newStack.length) {
+          setPageStack(newStack);
+        } else {
+          replaceTo(defaultRoute);
+        }
       }
     }, [defaultRoute, pageStack, routes]);
 
