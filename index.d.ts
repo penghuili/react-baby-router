@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 // Function declarations
 export function navigateTo(to: string): void;
@@ -24,6 +24,8 @@ export interface BabyRoutesProps {
   };
   defaultRoute?: string;
   enableAnimation?: boolean;
+  bgColor?: string;
+  maxWidth?: string;
 }
 
 export const BabyRoutes: React.MemoExoticComponent<React.FC<BabyRoutesProps>>;
