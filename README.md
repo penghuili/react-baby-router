@@ -99,6 +99,6 @@ function MyComponent() {
 
 That's everything.
 
-See how I use **react-baby-router** in [notenote.cc](https://github.com/penghuili/notenotecc)
+See how I use **react-baby-router** in [easyy.click](https://github.com/penghuili/easyy.click) and [notenote.cc](https://github.com/penghuili/notenotecc)
 
 You may noticed the `useCat` hook above, that's my simplest react state management lib: [usecat](https://github.com/penghuili/usecat)
